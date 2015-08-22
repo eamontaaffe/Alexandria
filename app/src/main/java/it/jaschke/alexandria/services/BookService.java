@@ -2,11 +2,16 @@ package it.jaschke.alexandria.services;
 
 import android.app.IntentService;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
+import android.widget.Toolbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -71,8 +76,22 @@ public class BookService extends IntentService {
      * parameters.
      */
     private void fetchBook(String ean) {
-
         if(ean.length()!=13){
+            return;
+        }
+
+        // BUG FIX for Josh
+        // Before anything we should check if we have a network connect to fetch the book from
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        if(!isConnected) {
+            //TODO need to display a message to the user about the network state (can't just toast from a background thread)
+            Log.v(LOG_TAG, "Not connected to the network");
             return;
         }
 
