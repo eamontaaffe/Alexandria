@@ -88,21 +88,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             @Override
             public void afterTextChanged(Editable s) {
-                String ean =s.toString();
-                //catch isbn10 numbers
-                if(ean.length()==10 && !ean.startsWith("978")){
-                    ean="978"+ean;
-                }
-                if(ean.length()<13){
-                    clearFields();
-                    return;
-                }
-                //Once we have an ISBN, start a book intent
-                Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean);
-                bookIntent.setAction(BookService.FETCH_BOOK);
-                getActivity().startService(bookIntent);
-                AddBook.this.restartLoader();
+                onEanEntered(s.toString());
             }
         });
 
@@ -153,6 +139,23 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     private void restartLoader(){
         getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
+    private void onEanEntered(String ean) {
+        //catch isbn10 numbers
+        if(ean.length()==10 && !ean.startsWith("978")){
+            ean="978"+ean;
+        }
+        if(ean.length()<13){
+            clearFields();
+            return;
+        }
+        //Once we have an ISBN, start a book intent
+        Intent bookIntent = new Intent(getActivity(), BookService.class);
+        bookIntent.putExtra(BookService.EAN, ean);
+        bookIntent.setAction(BookService.FETCH_BOOK);
+        getActivity().startService(bookIntent);
+        AddBook.this.restartLoader();
     }
 
     @Override
@@ -306,8 +309,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             if (result != 0) {
                 // When a barcode is found stop trying to find more barcodes
-                mCamera.setPreviewCallback(null);
-//                mCamera.stopPreview();
+                if(mCamera != null) {
+                    mCamera.setPreviewCallback(null);
+                    mCamera.stopPreview();
+                }
 
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
@@ -318,10 +323,15 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     builder.setMessage("barcode result " + sym.getData())
                             .setTitle("Barcode Found!")
                             .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                //TODO swap on dismissListener for something else compatable with API 15
+                                //TODO if two barcodes are found it might display two dialogs on top of one another
                                 @Override
                                 public void onDismiss(DialogInterface dialogInterface) {
                                     // Restart the scanner once the dialog is dismissed
-                                    mCamera.setPreviewCallback(mPreviewCb);
+                                    if(mCamera != null) {
+                                        mCamera.setPreviewCallback(mPreviewCb);
+                                        mCamera.startPreview();
+                                    }
                                 }
                             });
 
@@ -329,7 +339,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     AlertDialog dialog = builder.create();
                     dialog.show();
 
-                    Log.v(LOG_TAG,"barcode result " + sym.getData());
+                    Log.v(LOG_TAG, "barcode result " + sym.getData());
 
                 }
             }
