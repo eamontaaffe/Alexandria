@@ -1,7 +1,9 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.hardware.Camera;
@@ -309,6 +311,24 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
+                    // 1. Instantiate an AlertDialog.Builder with its constructor
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                    // 2. Chain together various setter methods to set the dialog characteristics
+                    builder.setMessage("barcode result " + sym.getData())
+                            .setTitle("Barcode Found!")
+                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    // Restart the scanner once the dialog is dismissed
+                                    mCamera.setPreviewCallback(mPreviewCb);
+                                }
+                            });
+
+                    // 3. Get the AlertDialog from create()
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
                     Log.v(LOG_TAG,"barcode result " + sym.getData());
 
                 }
