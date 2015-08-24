@@ -204,6 +204,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
+
+
     }
 
     @Override
@@ -243,6 +245,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         super.onPause();
         if (mCamera != null) {
             mCamera.stopPreview();
+            FrameLayout cameraView = (FrameLayout)rootView.findViewById(R.id.camera_view);
+            cameraView.removeView(mCameraPreview);
             mCamera.release();
             mCamera = null;
         }
@@ -310,7 +314,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             if (result != 0) {
                 // When a barcode is found stop trying to find more barcodes
                 if(mCamera != null) {
-                    mCamera.setPreviewCallback(null);
+//                    mCameraPreview.getHolder().removeCallback(mCameraPreview);
                     mCamera.stopPreview();
                 }
 
@@ -329,7 +333,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                                 public void onDismiss(DialogInterface dialogInterface) {
                                     // Restart the scanner once the dialog is dismissed
                                     if(mCamera != null) {
-                                        mCamera.setPreviewCallback(mPreviewCb);
+                                        //TODO re-attach callback without crashing the app
+//                                        mCamera.setPreviewCallback(mPreviewCb);
                                         mCamera.startPreview();
                                     }
                                 }
