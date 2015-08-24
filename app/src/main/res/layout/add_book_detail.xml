@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:orientation="vertical"
+        android:id="@+id/swipe_up_bar"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        android:background="@android:color/darker_gray">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/bookTitle"
+            android:text="The Martian"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="?android:textColorPrimary"
+            android:textIsSelectable="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Andy Weir"
+            android:id="@+id/authors"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:textColorSecondary"
+            android:layout_below="@id/bookTitle"
+            />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bookCover"
+        android:src="@drawable/mock_bookcover"
+        android:contentDescription="@string/book_cover"
+        android:layout_below="@+id/swipe_up_bar"
+        android:layout_alignParentRight="true"
+        android:layout_margin="16dp"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subtitile"
+        android:id="@+id/bookSubTitle"
+        android:layout_marginTop="16dp"
+        android:layout_below="@+id/swipe_up_bar"
+        android:paddingLeft="16dp"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:textColorPrimary"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/categories"
+        android:text="Science Fiction"
+        android:paddingLeft="16dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:textColorSecondary"
+        android:layout_below="@+id/bookSubTitle"
+        android:layout_marginTop="20dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/fullBookDesc"
+        android:layout_below="@id/categories"
+        android:paddingLeft="16dp"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="?android:attr/textColorPrimary"
+        android:text="Full Book Description"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="50dip"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="@string/cancel_button"
+            android:layout_weight="1"
+            style="?android:attr/buttonBarButtonStyle"
+            android:id="@+id/delete_button"
+            android:drawableLeft="@drawable/ic_action_discard"
+            android:visibility="visible"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="@string/ok_button"
+            android:visibility="visible"
+            android:layout_weight="1"
+            android:id="@+id/save_button"
+            android:drawableLeft="@drawable/ic_action_accept"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="bottom"
+            />
+    </LinearLayout>
+</RelativeLayout>

@@ -204,6 +204,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
         ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
 
+        String desc = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.DESC));
+        ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText(desc);
+
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
 
