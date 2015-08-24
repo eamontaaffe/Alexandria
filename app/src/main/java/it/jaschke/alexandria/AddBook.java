@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -23,19 +25,27 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import it.jaschke.alexandria.Camera.CameraView;
+import net.sourceforge.zbar.Config;
+import net.sourceforge.zbar.Image;
+import net.sourceforge.zbar.ImageScanner;
+import net.sourceforge.zbar.Symbol;
+import net.sourceforge.zbar.SymbolSet;
+
+import it.jaschke.alexandria.CameraPreview.CameraPreview;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
 
 
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final String TAG = "INTENT_TO_SCAN_ACTIVITY";
+    private static final String LOG_TAG = AddBook.class.getSimpleName();
     private EditText ean;
     private final int LOADER_ID = 1;
     private View rootView;
     private Camera mCamera = null;
-    private CameraView mCameraView = null;
+    private CameraPreview mCameraPreview = null;
+    private ImageScanner mScanner;
+    private Handler autoFocusHandler;
 
     private final String EAN_CONTENT="eanContent";
     private static final String SCAN_FORMAT = "scanFormat";
@@ -136,20 +146,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             ean.setHint("");
         }
 
-
-        //TODO move camera initialization off the UI thread
-        try{
-            mCamera = Camera.open();//you can use open(int) to use different cameras
-        } catch (Exception e){
-            Log.d("ERROR", "Failed to get camera: " + e.getMessage());
-        }
-
-        if(mCamera != null) {
-            mCameraView = new CameraView(getActivity(), mCamera);//create a SurfaceView to show camera data
-            FrameLayout camera_view = (FrameLayout)rootView.findViewById(R.id.camera_view);
-            camera_view.addView(mCameraView);//add the SurfaceView to the layout
-        }
-
         return rootView;
     }
 
@@ -227,10 +223,104 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    public void onResume() {
+        super.onResume();
+        //Open the camera and display a preview
 
-        mCamera.stopPreview();
-        mCamera.release();
+        if (mCamera == null) {
+            Log.v(LOG_TAG, "OpenCameraAsyncTask.execute");
+            new OpenCameraAsyncTask().execute();
+        }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mCamera != null) {
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
+    private class OpenCameraAsyncTask extends AsyncTask<Void, Void, Camera> {
+        @Override
+        protected Camera doInBackground(Void... voids) {
+            try{
+                //TODO add a setting for camera selection
+                Camera camera = Camera.open();//you can use open(int) to use different cameras
+                return camera;
+            } catch (Exception e){
+                Log.d("ERROR", "Failed to get camera: " + e.getMessage());
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Camera camera) {
+            super.onPostExecute(camera);
+            mCamera = camera;
+            if(mCamera != null) {
+                mCameraPreview = new CameraPreview(getActivity(), mCamera, mPreviewCb, mAutoFocusCB);//create a SurfaceView to show camera data
+                FrameLayout cameraView = (FrameLayout)rootView.findViewById(R.id.camera_view);
+
+                if (cameraView != null)
+                    cameraView.addView(mCameraPreview);//add the SurfaceView to the layout
+            }
+
+            /* Start autofocus ryunnable*/
+            autoFocusHandler = new Handler();
+
+            /* Instance barcode scanner */
+            mScanner = new ImageScanner();
+            mScanner.setConfig(0, Config.X_DENSITY, 3);
+            mScanner.setConfig(0, Config.Y_DENSITY, 3);
+        }
+    }
+
+    private Runnable doAutoFocus = new Runnable() {
+        public void run() {
+            if (mCamera != null)
+                mCamera.autoFocus(autoFocusCB);
+        }
+    };
+
+    // Mimic continuous auto-focusing
+    Camera.AutoFocusCallback autoFocusCB = new Camera.AutoFocusCallback() {
+        public void onAutoFocus(boolean success, Camera camera) {
+            autoFocusHandler.postDelayed(doAutoFocus, 1000);
+        }
+    };
+
+    Camera.PreviewCallback mPreviewCb = new Camera.PreviewCallback() {
+        public void onPreviewFrame(byte[] data, Camera camera) {
+            Camera.Parameters parameters = camera.getParameters();
+            Camera.Size size = parameters.getPreviewSize();
+
+            Image barcode = new Image(size.width, size.height, "Y800");
+            barcode.setData(data);
+
+            int result = mScanner.scanImage(barcode);
+
+            if (result != 0) {
+                // When a barcode is found stop trying to find more barcodes
+                mCamera.setPreviewCallback(null);
+//                mCamera.stopPreview();
+
+                SymbolSet syms = mScanner.getResults();
+                for (Symbol sym : syms) {
+                    Log.v(LOG_TAG,"barcode result " + sym.getData());
+
+                }
+            }
+        }
+    };
+
+    // Mimic continuous auto-focusing
+    Camera.AutoFocusCallback mAutoFocusCB = new Camera.AutoFocusCallback() {
+        public void onAutoFocus(boolean success, Camera camera) {
+            autoFocusHandler.postDelayed(doAutoFocus, 1000);
+        }
+    };
+
 }

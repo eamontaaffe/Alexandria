@@ -1,29 +1,35 @@
 package it.jaschke.alexandria.CameraPreview;
 
-/*
- * Barebones implementation of displaying camera preview.
- *
- * Created by lisah0 on 2012-02-24
- */
-
-import android.content.Context;
-import android.hardware.Camera;
-import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 
 import java.io.IOException;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+import android.util.Log;
+
+import android.view.View;
+import android.view.Surface;
+import android.view.SurfaceView;
+import android.view.SurfaceHolder;
+
+import android.content.Context;
+
+import android.hardware.Camera;
+import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.AutoFocusCallback;
+import android.hardware.Camera.Parameters;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
-    private Camera.PreviewCallback previewCallback;
-    private Camera.AutoFocusCallback autoFocusCallback;
+    private PreviewCallback previewCallback;
+    private AutoFocusCallback autoFocusCallback;
 
     public CameraPreview(Context context, Camera camera,
-                         Camera.PreviewCallback previewCb,
-                         Camera.AutoFocusCallback autoFocusCb) {
+                         PreviewCallback previewCb,
+                         AutoFocusCallback autoFocusCb) {
         super(context);
         mCamera = camera;
         previewCallback = previewCb;

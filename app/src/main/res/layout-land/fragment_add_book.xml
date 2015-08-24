@@ -8,6 +8,12 @@
         android:layout_height="fill_parent"
         android:layout_gravity="left|center_vertical">
 
+        <FrameLayout
+            android:layout_below="@id/eancontainer"
+            android:id="@+id/camera_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
