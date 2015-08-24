@@ -244,9 +244,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     public void onPause() {
         super.onPause();
         if (mCamera != null) {
+            mCamera.setPreviewCallback(null);
             mCamera.stopPreview();
-            FrameLayout cameraView = (FrameLayout)rootView.findViewById(R.id.camera_view);
-            cameraView.removeView(mCameraPreview);
             mCamera.release();
             mCamera = null;
         }
@@ -312,40 +311,12 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             int result = mScanner.scanImage(barcode);
 
             if (result != 0) {
-                // When a barcode is found stop trying to find more barcodes
-                if(mCamera != null) {
-//                    mCameraPreview.getHolder().removeCallback(mCameraPreview);
-                    mCamera.stopPreview();
-                }
+                mCamera.setPreviewCallback(null);
+                mCamera.stopPreview();
 
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
-                    // 1. Instantiate an AlertDialog.Builder with its constructor
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-                    // 2. Chain together various setter methods to set the dialog characteristics
-                    builder.setMessage("barcode result " + sym.getData())
-                            .setTitle("Barcode Found!")
-                            .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                                //TODO swap on dismissListener for something else compatable with API 15
-                                //TODO if two barcodes are found it might display two dialogs on top of one another
-                                @Override
-                                public void onDismiss(DialogInterface dialogInterface) {
-                                    // Restart the scanner once the dialog is dismissed
-                                    if(mCamera != null) {
-                                        //TODO re-attach callback without crashing the app
-//                                        mCamera.setPreviewCallback(mPreviewCb);
-                                        mCamera.startPreview();
-                                    }
-                                }
-                            });
-
-                    // 3. Get the AlertDialog from create()
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-
-                    Log.v(LOG_TAG, "barcode result " + sym.getData());
-
+                    Toast.makeText(getActivity(),"ISBN: " + sym.getData(),Toast.LENGTH_LONG).show();
                 }
             }
         }
