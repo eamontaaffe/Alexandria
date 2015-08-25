@@ -180,9 +180,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             ean="978"+ean;
         }
         if(ean.length()<13){
-            // TODO BUG FIX for Hsiao-Lu feedback
+            // BUG FIX for Hsiao-Lu feedback
             // It shouldn't clear the fields unless a new valid isbn is entered.
-            clearFields();
+//            clearFields();
             return;
         }
 //        setStatus(STATUS_LOADING);
@@ -261,7 +261,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
 
-        //TODO slide up the sliding panel and enable panel touch
         ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
                 .setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
@@ -279,9 +278,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         ((TextView) rootView.findViewById(R.id.categories)).setText("");
         ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText("");
 
-
-
-        //TODO disable panel touch and change heading to "Scan a barcode"
         setStatusVisibility(View.VISIBLE);
         setStatus(STATUS_SCANNING);
         ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))

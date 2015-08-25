@@ -4,6 +4,7 @@ package it.jaschke.alexandria.CameraPreview;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -75,8 +76,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
 
         try {
-            //TODO change camera rotation in landscape
-            mCamera.setDisplayOrientation(90);
+            int orientation = getResources().getConfiguration().orientation;
+            int setOrientation;
+            switch (orientation) {
+                case Configuration.ORIENTATION_LANDSCAPE:
+                    setOrientation = 0;
+                    break;
+                case Configuration.ORIENTATION_PORTRAIT:
+                    setOrientation = 90;
+                    break;
+                default:
+                    setOrientation = 90;
+                    break;
+            }
+            mCamera.setDisplayOrientation(setOrientation);
 
             mCamera.setPreviewDisplay(mHolder);
             mCamera.setPreviewCallback(previewCallback);
