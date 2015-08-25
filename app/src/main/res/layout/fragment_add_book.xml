@@ -50,7 +50,9 @@
                     <Button
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/scan_button"
+                        android:textAppearance="?android:textAppearanceMedium"
+                        android:textColor="?android:textColorSecondary"
+                        android:text="X"
                         android:id="@+id/scan_button"/>
 
                 </LinearLayout>
