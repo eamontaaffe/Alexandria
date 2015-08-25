@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.squareup.picasso.Picasso;
 
 import net.sourceforge.zbar.Config;
 import net.sourceforge.zbar.Image;
@@ -227,8 +228,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
             ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);
 
-            String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
-            ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
+//            String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
+//            ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
 
             String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
 
@@ -236,10 +237,17 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
             ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",", "\n"));
             String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-            if (Patterns.WEB_URL.matcher(imgUrl).matches()) {
-                new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
-                rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
+            ImageView bookCoverImageView = (ImageView) rootView.findViewById(R.id.bookCover);
+            try {
+                Picasso.with(getActivity())
+                        .load(imgUrl)
+                        .resize(bookCoverImageView.getWidth(), bookCoverImageView.getHeight())
+                        .centerCrop()
+                        .into(bookCoverImageView);
+            } catch (IllegalArgumentException e) {
+                Log.e(LOG_TAG,e.getMessage(),e);
             }
+            rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
 
             String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
             ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
@@ -264,9 +272,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     private void clearFields(){
-        setBookDiscriptionVisibility(View.GONE);
+        setBookDiscriptionVisibility(View.INVISIBLE);
         ((TextView) rootView.findViewById(R.id.bookTitle)).setText("");
-        ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
+//        ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.authors)).setText("");
         ((TextView) rootView.findViewById(R.id.categories)).setText("");
         ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText("");

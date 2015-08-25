@@ -39,9 +39,9 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:id="@+id/status_textview"
-            android:text="Scan a barcode"
+            android:text="@string/status_scanning"
             android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="?android:textColorPrimary"
+            android:textColor="?android:textColorSecondary"
             android:tag="@string/status_tag"
             />
     </RelativeLayout>
@@ -56,60 +56,44 @@
         android:layout_margin="16dp"/>
 
     <ImageView
-        android:layout_width="60dp"
+        android:layout_width="120dp"
         android:scaleType="center"
-        android:layout_height="wrap_content"
+        android:layout_height="180dp"
         android:id="@+id/bookCover"
-        android:src="@drawable/mock_bookcover"
         android:contentDescription="@string/book_cover"
         android:layout_below="@+id/swipe_up_bar"
-        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
         android:layout_margin="16dp"
         android:tag="@string/book_description_tag"
         android:visibility="invisible"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bookCover"
+            android:orientation="vertical"
+            android:padding="16dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/categories"
+                android:text="Science Fiction"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:textColorSecondary"
+                android:tag="@string/book_description_tag"
+                android:visibility="invisible"
+                />
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Subtitile"
-        android:id="@+id/bookSubTitle"
-        android:layout_marginTop="16dp"
-        android:layout_below="@+id/swipe_up_bar"
-        android:paddingLeft="16dp"
-        android:maxLines="3"
-        android:ellipsize="end"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:textColorPrimary"
-        android:tag="@string/book_description_tag"
-        android:visibility="invisible"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/categories"
-        android:text="Science Fiction"
-        android:paddingLeft="16dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:textColorSecondary"
-        android:layout_below="@+id/bookSubTitle"
-        android:layout_marginTop="20dp"
-        android:tag="@string/book_description_tag"
-        android:visibility="invisible"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/fullBookDesc"
-        android:layout_below="@id/categories"
-        android:paddingLeft="16dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorPrimary"
-        android:text="Full Book Description"
-        android:tag="@string/book_description_tag"
-        android:visibility="invisible"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/fullBookDesc"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary"
+                android:text="Full Book Description"
+                android:maxLines="6"
+                android:tag="@string/book_description_tag"
+                android:visibility="invisible"/>
+        </LinearLayout>
 
     <LinearLayout
         android:orientation="horizontal"
