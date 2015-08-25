@@ -31,6 +31,7 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
     private String ean;
     private String bookTitle;
     private ShareActionProvider shareActionProvider;
+    private Intent mShareIntent;
 
     public BookDetail(){
     }
@@ -72,6 +73,9 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
 
         MenuItem menuItem = menu.findItem(R.id.action_share);
         shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+        if(mShareIntent != null) {
+            shareActionProvider.setShareIntent(mShareIntent);
+        }
     }
 
     @Override
@@ -101,7 +105,12 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text)+bookTitle);
 
         //TODO FIXBUG NullPointerException on rotation of BookDetail fragment
-        shareActionProvider.setShareIntent(shareIntent);
+
+        if(shareActionProvider != null) {
+            shareActionProvider.setShareIntent(shareIntent);
+        } else {
+            mShareIntent = shareIntent;
+        }
 
         String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
         ((TextView) rootView.findViewById(R.id.fullBookSubTitle)).setText(bookSubTitle);
