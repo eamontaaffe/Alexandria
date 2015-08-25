@@ -28,12 +28,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private AutoFocusCallback autoFocusCallback;
 
     public CameraPreview(Context context, Camera camera,
-                         PreviewCallback previewCb,
-                         AutoFocusCallback autoFocusCb) {
+                         PreviewCallback previewCb/*,
+                         AutoFocusCallback autoFocusCb*/) {
         super(context);
         mCamera = camera;
         previewCallback = previewCb;
-        autoFocusCallback = autoFocusCb;
+//        autoFocusCallback = autoFocusCb;
 
         /*
          * Set camera to continuous focus if supported, otherwise use
@@ -96,7 +96,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.setPreviewDisplay(mHolder);
             mCamera.setPreviewCallback(previewCallback);
             mCamera.startPreview();
-            mCamera.autoFocus(autoFocusCallback);
+//            mCamera.autoFocus(autoFocusCallback);
         } catch (Exception e){
             Log.d("DBG", "Error starting camera preview: " + e.getMessage());
         }

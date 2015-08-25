@@ -1,9 +1,7 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.hardware.Camera;
@@ -26,8 +24,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.sourceforge.zbar.Config;
 import net.sourceforge.zbar.Image;
@@ -90,7 +86,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             @Override
             public void afterTextChanged(Editable s) {
-                onEanEntered(s.toString());
+                submitEan(s.toString());
             }
         });
 
@@ -143,12 +139,14 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
-    private void onEanEntered(String ean) {
+    private void submitEan(String ean) {
         //catch isbn10 numbers
         if(ean.length()==10 && !ean.startsWith("978")){
             ean="978"+ean;
         }
         if(ean.length()<13){
+            // TODO BUG FIX for Hsiao-Lu feedback
+            // It shouldn't clear the fields unless a new valid isbn is entered.
             clearFields();
             return;
         }
@@ -210,9 +208,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
 
-        //TODO slide up the sliding panel
-
-
+        //TODO slide up the sliding panel and enable panel touch
     }
 
     @Override
@@ -225,9 +221,12 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.authors)).setText("");
         ((TextView) rootView.findViewById(R.id.categories)).setText("");
+        ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText("");
         rootView.findViewById(R.id.bookCover).setVisibility(View.INVISIBLE);
         rootView.findViewById(R.id.save_button).setVisibility(View.INVISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.INVISIBLE);
+
+        //TODO disable panel touch and change heading to "Scan a barcode"
     }
 
     @Override
@@ -276,7 +275,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             super.onPostExecute(camera);
             mCamera = camera;
             if(mCamera != null) {
-                mCameraPreview = new CameraPreview(getActivity(), mCamera, mPreviewCb, mAutoFocusCB);//create a SurfaceView to show camera data
+                mCameraPreview = new CameraPreview(getActivity(), mCamera, mPreviewCb/*, mAutoFocusCB*/);//create a SurfaceView to show camera data
                 FrameLayout cameraView = (FrameLayout)rootView.findViewById(R.id.camera_view);
 
                 if (cameraView != null)
@@ -292,20 +291,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             mScanner.setConfig(0, Config.Y_DENSITY, 3);
         }
     }
-
-    private Runnable doAutoFocus = new Runnable() {
-        public void run() {
-            if (mCamera != null)
-                mCamera.autoFocus(autoFocusCB);
-        }
-    };
-
-    // Mimic continuous auto-focusing
-    Camera.AutoFocusCallback autoFocusCB = new Camera.AutoFocusCallback() {
-        public void onAutoFocus(boolean success, Camera camera) {
-            autoFocusHandler.postDelayed(doAutoFocus, 1000);
-        }
-    };
 
     Camera.PreviewCallback mPreviewCb = new Camera.PreviewCallback() {
         public void onPreviewFrame(byte[] data, Camera camera) {
@@ -324,16 +309,24 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
                     Toast.makeText(getActivity(),"ISBN: " + sym.getData(),Toast.LENGTH_LONG).show();
+                    submitEan(sym.getData());
                 }
             }
         }
     };
 
+//    private Runnable doAutoFocus = new Runnable() {
+//        public void run() {
+//            if (mCamera != null)
+//                mCamera.autoFocus(mAutoFocusCB);
+//        }
+//    };
+
     // Mimic continuous auto-focusing
-    Camera.AutoFocusCallback mAutoFocusCB = new Camera.AutoFocusCallback() {
-        public void onAutoFocus(boolean success, Camera camera) {
-            autoFocusHandler.postDelayed(doAutoFocus, 1000);
-        }
-    };
+//    Camera.AutoFocusCallback mAutoFocusCB = new Camera.AutoFocusCallback() {
+//        public void onAutoFocus(boolean success, Camera camera) {
+//            autoFocusHandler.postDelayed(doAutoFocus, 1000);
+//        }
+//    };
 
 }
