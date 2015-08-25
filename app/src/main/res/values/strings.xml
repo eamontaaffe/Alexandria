@@ -25,6 +25,8 @@
     <string name="back_button">go back</string>
     <string name="share_text">A must read book: </string>
 
+    <string name="delete_button_text">X</string>
+
     <string name="book_description_tag" translatable="false">book_description_tag</string>
     <string name="status_tag" translatable="false">status_tag</string>
 

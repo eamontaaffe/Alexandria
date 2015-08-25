@@ -104,8 +104,8 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text)+bookTitle);
 
-        //TODO FIXBUG NullPointerException on rotation of BookDetail fragment
-
+        // BUGFIX NullPointerException on rotation of BookDetail fragment.
+        // Also changed onCreateOptionsMenu to accomodate shareActionProvider.setShareIntent later.
         if(shareActionProvider != null) {
             shareActionProvider.setShareIntent(shareIntent);
         } else {

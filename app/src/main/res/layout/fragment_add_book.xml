@@ -48,7 +48,7 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:textAppearanceMedium"
                         android:textColor="?android:textColorSecondary"
-                        android:text="X"
+                        android:text="@string/delete_button_text"
                         android:id="@+id/scan_button"/>
 
                 </LinearLayout>

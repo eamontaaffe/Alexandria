@@ -16,7 +16,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/bookTitle"
-            android:text="The Martian"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="?android:textColorPrimary"
             android:visibility="invisible"
@@ -25,7 +24,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Andy Weir"
             android:id="@+id/authors"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:textColorSecondary"
@@ -76,7 +74,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/categories"
-                android:text="Science Fiction"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:textColorSecondary"
                 android:tag="@string/book_description_tag"
@@ -89,7 +86,6 @@
                 android:id="@+id/fullBookDesc"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorPrimary"
-                android:text="Full Book Description"
                 android:maxLines="6"
                 android:tag="@string/book_description_tag"
                 android:visibility="invisible"/>
