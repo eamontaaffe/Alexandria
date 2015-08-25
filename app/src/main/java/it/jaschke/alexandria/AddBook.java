@@ -16,6 +16,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -24,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.sourceforge.zbar.Config;
 import net.sourceforge.zbar.Image;
@@ -132,6 +135,40 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             ean.setHint("");
         }
 
+        ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
+                .setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+                    @Override
+                    public void onPanelSlide(View view, float v) {
+
+                    }
+
+                    @Override
+                    public void onPanelCollapsed(View view) {
+                        if(mCamera != null) {
+                            mCamera.setPreviewCallback(mPreviewCb);
+                            mCamera.startPreview();
+                        }
+                    }
+
+                    @Override
+                    public void onPanelExpanded(View view) {
+                        if(mCamera != null) {
+                            mCamera.setPreviewCallback(null);
+                            mCamera.stopPreview();
+                        }
+                    }
+
+                    @Override
+                    public void onPanelAnchored(View view) {
+
+                    }
+
+                    @Override
+                    public void onPanelHidden(View view) {
+
+                    }
+                });
+
         return rootView;
     }
 
@@ -183,32 +220,40 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             return;
         }
 
-        String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
-        ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);
+        //BUGFIX if some of the fields are empty it will throw a NullPointerException
+        try {
+            String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
+            ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);
 
-        String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
-        ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
+            String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
+            ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
 
-        String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
-        String[] authorsArr = authors.split(",");
-        ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
-        ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
-        String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        if(Patterns.WEB_URL.matcher(imgUrl).matches()){
-            new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
-            rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
+            String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
+
+            String[] authorsArr = authors.split(",");
+            ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
+            ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",", "\n"));
+            String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
+            if (Patterns.WEB_URL.matcher(imgUrl).matches()) {
+                new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
+                rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
+            }
+
+            String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
+            ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
+
+            String desc = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.DESC));
+            ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText(desc);
+        } catch (NullPointerException e) {
+            Log.e(LOG_TAG,e.getMessage(),e);
         }
-
-        String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
-        ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
-
-        String desc = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.DESC));
-        ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText(desc);
 
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
 
         //TODO slide up the sliding panel and enable panel touch
+        ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
+                .setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
     }
 
     @Override
@@ -227,6 +272,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.delete_button).setVisibility(View.INVISIBLE);
 
         //TODO disable panel touch and change heading to "Scan a barcode"
+        ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
+                .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 
     @Override
@@ -274,6 +321,12 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         protected void onPostExecute(Camera camera) {
             super.onPostExecute(camera);
             mCamera = camera;
+
+            //Set focus mode to continous
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            mCamera.setParameters(parameters);
+
             if(mCamera != null) {
                 mCameraPreview = new CameraPreview(getActivity(), mCamera, mPreviewCb/*, mAutoFocusCB*/);//create a SurfaceView to show camera data
                 FrameLayout cameraView = (FrameLayout)rootView.findViewById(R.id.camera_view);
@@ -281,9 +334,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 if (cameraView != null)
                     cameraView.addView(mCameraPreview);//add the SurfaceView to the layout
             }
-
-            /* Start autofocus ryunnable*/
-            autoFocusHandler = new Handler();
 
             /* Instance barcode scanner */
             mScanner = new ImageScanner();
@@ -309,24 +359,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
                     Toast.makeText(getActivity(),"ISBN: " + sym.getData(),Toast.LENGTH_LONG).show();
-                    submitEan(sym.getData());
+                    ean = (EditText) rootView.findViewById(R.id.ean);
+                    ean.setText(sym.getData());
                 }
             }
         }
     };
-
-//    private Runnable doAutoFocus = new Runnable() {
-//        public void run() {
-//            if (mCamera != null)
-//                mCamera.autoFocus(mAutoFocusCB);
-//        }
-//    };
-
-    // Mimic continuous auto-focusing
-//    Camera.AutoFocusCallback mAutoFocusCB = new Camera.AutoFocusCallback() {
-//        public void onAutoFocus(boolean success, Camera camera) {
-//            autoFocusHandler.postDelayed(doAutoFocus, 1000);
-//        }
-//    };
-
 }
