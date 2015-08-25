@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:gravity="bottom">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="?android:attr/listPreferredItemHeight"
         android:orientation="vertical"
@@ -19,7 +19,8 @@
             android:text="The Martian"
             android:textAppearance="?android:textAppearanceMedium"
             android:textColor="?android:textColorPrimary"
-            android:textIsSelectable="true" />
+            android:visibility="invisible"
+            android:tag="@string/book_description_tag"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,18 +30,43 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:textColorSecondary"
             android:layout_below="@id/bookTitle"
+            android:visibility="invisible"
+            android:tag="@string/book_description_tag"
             />
-    </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:id="@+id/status_textview"
+            android:text="Scan a barcode"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="?android:textColorPrimary"
+            android:tag="@string/status_tag"
+            />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/status_description_textview"
+        android:text="@string/how_to_scan"
+        android:layout_below="@id/swipe_up_bar"
+        android:tag="@string/status_tag"
+        android:layout_margin="16dp"/>
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="60dp"
+        android:scaleType="center"
         android:layout_height="wrap_content"
         android:id="@+id/bookCover"
         android:src="@drawable/mock_bookcover"
         android:contentDescription="@string/book_cover"
         android:layout_below="@+id/swipe_up_bar"
         android:layout_alignParentRight="true"
-        android:layout_margin="16dp"/>
+        android:layout_margin="16dp"
+        android:tag="@string/book_description_tag"
+        android:visibility="invisible"/>
 
 
     <TextView
@@ -55,6 +81,8 @@
         android:ellipsize="end"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:textColorPrimary"
+        android:tag="@string/book_description_tag"
+        android:visibility="invisible"
         />
 
     <TextView
@@ -67,6 +95,8 @@
         android:textColor="?android:textColorSecondary"
         android:layout_below="@+id/bookSubTitle"
         android:layout_marginTop="20dp"
+        android:tag="@string/book_description_tag"
+        android:visibility="invisible"
         />
 
     <TextView
@@ -77,7 +107,9 @@
         android:paddingLeft="16dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorPrimary"
-        android:text="Full Book Description"/>
+        android:text="Full Book Description"
+        android:tag="@string/book_description_tag"
+        android:visibility="invisible"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -95,19 +127,21 @@
             style="?android:attr/buttonBarButtonStyle"
             android:id="@+id/delete_button"
             android:drawableLeft="@drawable/ic_action_discard"
-            android:visibility="visible"
+            android:visibility="invisible"
+            android:tag="@string/book_description_tag"
             />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:text="@string/ok_button"
-            android:visibility="visible"
+            android:visibility="invisible"
             android:layout_weight="1"
             android:id="@+id/save_button"
             android:drawableLeft="@drawable/ic_action_accept"
             style="?android:attr/buttonBarButtonStyle"
             android:layout_gravity="bottom"
+            android:tag="@string/book_description_tag"
             />
     </LinearLayout>
 </RelativeLayout>

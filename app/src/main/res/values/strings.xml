@@ -25,6 +25,18 @@
     <string name="back_button">go back</string>
     <string name="share_text">A must read book: </string>
 
+    <string name="book_description_tag" translatable="false">book_description_tag</string>
+    <string name="status_tag" translatable="false">status_tag</string>
+
+    <string name="status_scanning">Scan a barcode</string>
+    <string name="how_to_scan">Use the camera to scan the barcode on the back of a book.</string>
+
+    <string name="status_loading">Loading book</string>
+    <string name="please_wait">Please wait while the book is loading</string>
+
+    <string name="status_book_not_found">Book not found</string>
+    <string name="book_not_found_message">This ISBN could not be found, please try again.</string>
+
 <!-- TODO: Remove or change this placeholder text -->
     <string name="about_text">This application gets book information from a Google API. All titles, cover images, and author information come from there.
     The original version of this app was built by Sascha Jaschke, and a modified version is given to students in the Udacity Android Nanodegree program. </string>

@@ -1,7 +1,6 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.hardware.Camera;
@@ -16,7 +15,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -33,6 +31,8 @@ import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
+
+import java.util.ArrayList;
 
 import it.jaschke.alexandria.CameraPreview.CameraPreview;
 import it.jaschke.alexandria.data.AlexandriaContract;
@@ -53,6 +53,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private final String EAN_CONTENT="eanContent";
     private static final String SCAN_FORMAT = "scanFormat";
     private static final String SCAN_CONTENTS = "scanContents";
+    private static final int STATUS_SCANNING = 0;
+    private static final int STATUS_LOADING= 1;
+    private static final int STATUS_BOOK_NOT_FOUND = 2;
 
     private String mScanFormat = "Format:";
     private String mScanContents = "Contents:";
@@ -135,6 +138,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     @Override
                     public void onPanelCollapsed(View view) {
                         if(mCamera != null) {
+                            setStatus(STATUS_SCANNING);
                             mCamera.setPreviewCallback(mPreviewCb);
                             mCamera.startPreview();
                         }
@@ -142,10 +146,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
                     @Override
                     public void onPanelExpanded(View view) {
-                        if(mCamera != null) {
-                            mCamera.setPreviewCallback(null);
-                            mCamera.stopPreview();
-                        }
+//                        if(mCamera != null) {
+//                            mCamera.setPreviewCallback(null);
+//                            mCamera.stopPreview();
+//                        }
                     }
 
                     @Override
@@ -159,11 +163,14 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     }
                 });
 
+        setStatus(STATUS_SCANNING);
+
         return rootView;
     }
 
     private void restartLoader(){
         getLoaderManager().restartLoader(LOADER_ID, null, this);
+
     }
 
     private void submitEan(String ean) {
@@ -177,6 +184,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             clearFields();
             return;
         }
+//        setStatus(STATUS_LOADING);
         //Once we have an ISBN, start a book intent
         Intent bookIntent = new Intent(getActivity(), BookService.class);
         bookIntent.putExtra(BookService.EAN, ean);
@@ -188,6 +196,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     @Override
     public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(ean.getText().length()==0){
+            setStatus(STATUS_BOOK_NOT_FOUND);
             return null;
         }
         String eanStr= ean.getText().toString();
@@ -212,6 +221,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
         //BUGFIX if some of the fields are empty it will throw a NullPointerException
         try {
+            setStatusVisibility(View.GONE);
+            setBookDiscriptionVisibility(View.VISIBLE);
+
             String bookTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.TITLE));
             ((TextView) rootView.findViewById(R.id.bookTitle)).setText(bookTitle);
 
@@ -252,16 +264,18 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     private void clearFields(){
+        setBookDiscriptionVisibility(View.GONE);
         ((TextView) rootView.findViewById(R.id.bookTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.authors)).setText("");
         ((TextView) rootView.findViewById(R.id.categories)).setText("");
         ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText("");
-        rootView.findViewById(R.id.bookCover).setVisibility(View.INVISIBLE);
-        rootView.findViewById(R.id.save_button).setVisibility(View.INVISIBLE);
-        rootView.findViewById(R.id.delete_button).setVisibility(View.INVISIBLE);
+
+
 
         //TODO disable panel touch and change heading to "Scan a barcode"
+        setStatusVisibility(View.VISIBLE);
+        setStatus(STATUS_SCANNING);
         ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
                 .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
 
@@ -270,6 +284,30 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             mCamera.startPreview();
         }
 
+    }
+
+    private void setStatus(int status) {
+        TextView statusTextview = (TextView) rootView.findViewById(R.id.status_textview);
+        TextView statusDescriptionTextview
+                = (TextView) rootView.findViewById(R.id.status_description_textview);
+
+        switch (status) {
+            case STATUS_SCANNING:
+                statusTextview.setText(R.string.status_scanning);
+                statusDescriptionTextview.setText(R.string.how_to_scan);
+                break;
+            case STATUS_LOADING:
+                statusTextview.setText(R.string.status_loading);
+                statusDescriptionTextview.setText(R.string.please_wait);
+                break;
+            case STATUS_BOOK_NOT_FOUND:
+                statusTextview.setText(R.string.status_book_not_found);
+                statusDescriptionTextview.setText(R.string.book_not_found_message);
+                break;
+            default:
+                statusTextview.setText(R.string.status_scanning);
+                statusDescriptionTextview.setText(R.string.how_to_scan);
+        }
     }
 
     @Override
@@ -298,6 +336,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             mCamera.release();
             mCamera = null;
         }
+
     }
 
     private class OpenCameraAsyncTask extends AsyncTask<Void, Void, Camera> {
@@ -354,11 +393,44 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
                 SymbolSet syms = mScanner.getResults();
                 for (Symbol sym : syms) {
-                    Toast.makeText(getActivity(),"ISBN: " + sym.getData(),Toast.LENGTH_LONG).show();
                     ean = (EditText) rootView.findViewById(R.id.ean);
                     ean.setText(sym.getData());
                 }
             }
         }
     };
+
+    private void setBookDiscriptionVisibility(int visibility) {
+        ArrayList<View> views
+                = getViewsByTag((ViewGroup) rootView, getString(R.string.book_description_tag));
+        for(View view : views ) {
+            view.setVisibility(visibility);
+        }
+    }
+
+    private void setStatusVisibility(int visibility) {
+        ArrayList<View> views
+                = getViewsByTag((ViewGroup) rootView, getString(R.string.status_tag));
+        for(View view : views ) {
+            view.setVisibility(visibility);
+        }
+    }
+
+    private static ArrayList<View> getViewsByTag(ViewGroup root, String tag){
+        ArrayList<View> views = new ArrayList<View>();
+        final int childCount = root.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = root.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                views.addAll(getViewsByTag((ViewGroup) child, tag));
+            }
+
+            final Object tagObj = child.getTag();
+            if (tagObj != null && tagObj.equals(tag)) {
+                views.add(child);
+            }
+
+        }
+        return views;
+    }
 }
