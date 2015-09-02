@@ -110,6 +110,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             @Override
             public void onClick(View view) {
                 ean.setText("");
+                
+                ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
+                        .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
         });
 
@@ -121,6 +124,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 bookIntent.setAction(BookService.DELETE_BOOK);
                 getActivity().startService(bookIntent);
                 ean.setText("");
+
+                ((SlidingUpPanelLayout) rootView.findViewById(R.id.sliding_layout))
+                        .setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
         });
 
