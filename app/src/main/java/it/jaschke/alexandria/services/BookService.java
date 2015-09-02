@@ -67,7 +67,13 @@ public class BookService extends IntentService {
      */
     private void deleteBook(String ean) {
         if(ean!=null) {
-            getContentResolver().delete(AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)), null, null);
+            // BUG FIX if the cancel button is pressed twice, "" is submitted which raises a
+            // NumberFormatException from the Long.parseLong(ean)
+            try {
+                getContentResolver().delete(AlexandriaContract.BookEntry.buildBookUri(Long.parseLong(ean)), null, null);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
     }
 
